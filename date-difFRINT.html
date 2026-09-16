@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حساب الفرق بين تاريخين</title>
+<style>
+  :root{
+    --bg:#f5f4f2;
+    --card-bg:#ffffff;
+    --text:#1c1b1a;
+    --text-muted:#6b6863;
+    --accent:#8a5a44;
+    --accent-2:#c98a5e;
+    --border:#e5e2dd;
+    --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#171615;
+      --card-bg:#221f1d;
+      --text:#f2efe9;
+      --text-muted:#a89f96;
+      --border:#33302c;
+      --shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#171615;
+    --card-bg:#221f1d;
+    --text:#f2efe9;
+    --text-muted:#a89f96;
+    --border:#33302c;
+    --shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .card{
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+    padding:32px;
+    width:100%;
+    max-width:520px;
+  }
+  h1{
+    font-size:22px;
+    margin:0 0 6px;
+    text-align:center;
+  }
+  p.subtitle{
+    text-align:center;
+    color:var(--text-muted);
+    margin:0 0 28px;
+    font-size:14px;
+  }
+  .inputs{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin-bottom:20px;
+  }
+  .field{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .date-group{
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+    background:var(--bg);
+  }
+  .date-group-title{
+    font-size:13px;
+    font-weight:bold;
+    color:var(--accent);
+    margin-bottom:10px;
+    text-align:center;
+  }
+  .dmy{
+    display:flex;
+    gap:8px;
+  }
+  .dmy .field{
+    flex:1;
+  }
+  label{
+    font-size:12px;
+    color:var(--text-muted);
+    font-weight:bold;
+  }
+  input[type="number"]{
+    padding:10px 8px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--card-bg);
+    color:var(--text);
+    font-size:15px;
+    font-family:inherit;
+    width:100%;
+    text-align:center;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+  input[type="number"]{
+    -moz-appearance:textfield;
+  }
+  button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:#fff;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:transform .15s ease, opacity .15s ease;
+    font-family:inherit;
+  }
+  button:hover{opacity:.92;}
+  button:active{transform:scale(0.98);}
+
+  .result{
+    margin-top:26px;
+    display:none;
+  }
+  .result.show{display:block;}
+  .headline{
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:18px;
+    color:var(--accent);
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .stat{
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 8px;
+    text-align:center;
+  }
+  .stat .num{
+    font-size:20px;
+    font-weight:bold;
+    color:var(--accent);
+  }
+  .stat .lbl{
+    font-size:12px;
+    color:var(--text-muted);
+    margin-top:4px;
+  }
+  .extra{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 4px;
+    border-top:1px solid var(--border);
+    font-size:14px;
+    color:var(--text-muted);
+  }
+  .extra span.v{
+    color:var(--text);
+    font-weight:bold;
+  }
+  .error{
+    color:#c0392b;
+    text-align:center;
+    font-size:14px;
+    margin-top:14px;
+    display:none;
+  }
+  .error.show{display:block;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>📅 حساب الفرق بين تاريخين</h1>
+    <p class="subtitle">اختر تاريخين ميلاديين لمعرفة الفرق بينهما</p>
+
+    <div class="inputs">
+      <div class="date-group">
+        <div class="date-group-title">التاريخ الأول</div>
+        <div class="dmy">
+          <div class="field">
+            <label for="d1-day">يوم</label>
+            <input type="number" id="d1-day" min="1" max="31" placeholder="يوم">
+          </div>
+          <div class="field">
+            <label for="d1-month">شهر</label>
+            <input type="number" id="d1-month" min="1" max="12" placeholder="شهر">
+          </div>
+          <div class="field">
+            <label for="d1-year">سنة</label>
+            <input type="number" id="d1-year" min="1" max="9999" placeholder="سنة">
+          </div>
+        </div>
+      </div>
+      <div class="date-group">
+        <div class="date-group-title">التاريخ الثاني</div>
+        <div class="dmy">
+          <div class="field">
+            <label for="d2-day">يوم</label>
+            <input type="number" id="d2-day" min="1" max="31" placeholder="يوم">
+          </div>
+          <div class="field">
+            <label for="d2-month">شهر</label>
+            <input type="number" id="d2-month" min="1" max="12" placeholder="شهر">
+          </div>
+          <div class="field">
+            <label for="d2-year">سنة</label>
+            <input type="number" id="d2-year" min="1" max="9999" placeholder="سنة">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button onclick="calculate()">احسب الفرق</button>
+
+    <div class="error" id="error">من فضلك أدخل يوم وشهر وسنة صحيحين لكلا التاريخين.</div>
+
+    <div class="result" id="result">
+      <div class="headline" id="headline"></div>
+      <div class="grid">
+        <div class="stat">
+          <div class="num" id="years">0</div>
+          <div class="lbl">سنة</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="months">0</div>
+          <div class="lbl">شهر</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="days">0</div>
+          <div class="lbl">يوم</div>
+        </div>
+      </div>
+      <div class="extra"><span>إجمالي عدد الأيام</span><span class="v" id="totalDays">0</span></div>
+      <div class="extra"><span>إجمالي عدد الأسابيع</span><span class="v" id="totalWeeks">0</span></div>
+      <div class="extra"><span>إجمالي عدد الأشهر (تقريبي)</span><span class="v" id="totalMonths">0</span></div>
+    </div>
+  </div>
+
+<script>
+  function buildDate(dayId, monthId, yearId){
+    const day = parseInt(document.getElementById(dayId).value, 10);
+    const month = parseInt(document.getElementById(monthId).value, 10);
+    const year = parseInt(document.getElementById(yearId).value, 10);
+
+    if(!day || !month || !year) return null;
+    if(month < 1 || month > 12) return null;
+    if(day < 1 || day > 31) return null;
+
+    const date = new Date(year, month - 1, day);
+    // تحقق من أن التاريخ صحيح فعلاً (مثلاً لا يوجد 31 فبراير)
+    if(date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day){
+      return null;
+    }
+    return date;
+  }
+
+  function calculate(){
+    const errorEl = document.getElementById('error');
+    const resultEl = document.getElementById('result');
+
+    let start = buildDate('d1-day', 'd1-month', 'd1-year');
+    let end = buildDate('d2-day', 'd2-month', 'd2-year');
+
+    if(!start || !end){
+      errorEl.classList.add('show');
+      resultEl.classList.remove('show');
+      return;
+    }
+    errorEl.classList.remove('show');
+
+    if(start > end){
+      [start, end] = [end, start];
+    }
+
+    // Total days difference
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const totalDays = Math.round((end - start) / msPerDay);
+    const totalWeeks = (totalDays / 7).toFixed(1);
+
+    // Years / Months / Days breakdown
+    let years = end.getFullYear() - start.getFullYear();
+    let months = end.getMonth() - start.getMonth();
+    let days = end.getDate() - start.getDate();
+
+    if(days < 0){
+      months -= 1;
+      const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+      days += prevMonth.getDate();
+    }
+    if(months < 0){
+      years -= 1;
+      months += 12;
+    }
+
+    const totalMonths = years * 12 + months;
+
+    document.getElementById('years').textContent = years;
+    document.getElementById('months').textContent = months;
+    document.getElementById('days').textContent = days;
+    document.getElementById('totalDays').textContent = totalDays.toLocaleString('ar-EG');
+    document.getElementById('totalWeeks').textContent = totalWeeks;
+    document.getElementById('totalMonths').textContent = totalMonths.toLocaleString('ar-EG');
+
+    let headline;
+    if(totalDays === 0){
+      headline = 'التاريخان متطابقان';
+    } else {
+      const parts = [];
+      if(years > 0) parts.push(years + ' سنة');
+      if(months > 0) parts.push(months + ' شهر');
+      if(days > 0) parts.push(days + ' يوم');
+      headline = parts.length ? parts.join(' و ') : 'أقل من يوم';
+    }
+    document.getElementById('headline').textContent = headline;
+
+    resultEl.classList.add('show');
+  }
+
+  // القيمة الافتراضية: اليوم للتاريخ الثاني
+  const today = new Date();
+  document.getElementById('d2-day').value = today.getDate();
+  document.getElementById('d2-month').value = today.getMonth() + 1;
+  document.getElementById('d2-year').value = today.getFullYear();
+</script>
+</body>
+</html>
